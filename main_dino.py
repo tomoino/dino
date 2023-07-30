@@ -38,6 +38,10 @@ torchvision_archs = sorted(name for name in torchvision_models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(torchvision_models.__dict__[name]))
 
+print()
+print(f"torchvision_archs: {torchvision_archs}")
+print()
+
 def get_args_parser():
     parser = argparse.ArgumentParser('DINO', add_help=False)
 
@@ -142,7 +146,8 @@ def train_dino(args):
         args.local_crops_scale,
         args.local_crops_number,
     )
-    dataset = datasets.ImageFolder(args.data_path, transform=transform)
+    # dataset = datasets.ImageFolder(args.data_path, transform=transform)
+    dataset = datasets.CIFAR10(root='/workspace/datasets', train=True, download=True, transform=transform)
     sampler = torch.utils.data.DistributedSampler(dataset, shuffle=True)
     data_loader = torch.utils.data.DataLoader(
         dataset,
