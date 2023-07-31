@@ -29,17 +29,29 @@ tasks:
     desc: run test
     cmd: docker exec -it $CONTAINER_NAME python3 -m pytest -svv {{.CLI_ARGS}}
 
-  train:
+  train_resnet18:
     desc: run train
     cmds: 
     - | 
       docker exec -it $CONTAINER_NAME python3 -m torch.distributed.launch \
       main_dino.py \
       --arch resnet18 \
-      --epochs 1 \
+      --epochs 100 \
       --warmup_epochs 1 \
       --optimizer sgd \
       --lr 0.03 \
       --weight_decay 1e-4 \
       --weight_decay_end 1e-4 \
-      --output_dir /workspace/outputs
+      --output_dir /workspace/outputs/resnet18
+
+
+  train_vitt:
+    desc: run train
+    cmds: 
+    - | 
+      docker exec -it $CONTAINER_NAME python3 -m torch.distributed.launch \
+      main_dino.py \
+      --arch vit_tiny \
+      --epochs 100 \
+      --warmup_epochs 10 \
+      --output_dir /workspace/outputs/vit_tiny

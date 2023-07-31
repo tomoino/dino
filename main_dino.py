@@ -19,6 +19,7 @@ import time
 import math
 import json
 from pathlib import Path
+from matplotlib import pyplot as plt
 
 import numpy as np
 from PIL import Image
@@ -29,6 +30,7 @@ import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torchvision import models as torchvision_models
+import pandas as pd
 
 import utils
 import vision_transformer as vits
@@ -216,6 +218,12 @@ def train_dino(args):
         p.requires_grad = False
     print(f"Student and Teacher are built: they are both {args.arch} network.")
 
+    params = 0
+    for p in student.parameters():
+        if p.requires_grad:
+            params += p.numel()
+    print(f"The student has {params} trainable parameters")
+
     # ============ preparing loss ... ============
     dino_loss = DINOLoss(
         args.out_dim,
@@ -271,6 +279,7 @@ def train_dino(args):
 
     start_time = time.time()
     print("Starting DINO training !")
+    epoch_losses = []
     for epoch in range(start_epoch, args.epochs):
         data_loader.sampler.set_epoch(epoch)
 
@@ -278,6 +287,9 @@ def train_dino(args):
         train_stats = train_one_epoch(student, teacher, teacher_without_ddp, dino_loss,
             data_loader, optimizer, lr_schedule, wd_schedule, momentum_schedule,
             epoch, fp16_scaler, args)
+        
+        epoch_loss = train_stats['loss']
+        epoch_losses.append(epoch_loss)
 
         # ============ writing logs ... ============
         save_dict = {
@@ -301,6 +313,15 @@ def train_dino(args):
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     print('Training time {}'.format(total_time_str))
+
+    # save loss curve
+    df = pd.DataFrame(data={
+        "x": list(range(len(epoch_losses))),
+        "y": epoch_losses
+    })
+    df.plot(x="x", y="y", kind="line", xlabel="Epoch", ylabel="Loss")
+    plt.savefig(f'{args.output_dir}/loss.png')
+
 
 
 def train_one_epoch(student, teacher, teacher_without_ddp, dino_loss, data_loader,

@@ -3,6 +3,8 @@ torchvision == 0.8.2+cu110
 -f https://download.pytorch.org/whl/torch_stable.html
 submitit
 timm
+pandas
+matplotlib
 
 # 開発用
 pytest
