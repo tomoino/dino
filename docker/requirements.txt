@@ -5,6 +5,7 @@ submitit
 timm
 pandas
 matplotlib
+scikit-learn
 
 # 開発用
 pytest

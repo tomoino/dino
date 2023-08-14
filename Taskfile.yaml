@@ -52,6 +52,24 @@ tasks:
       docker exec -it $CONTAINER_NAME python3 -m torch.distributed.launch \
       main_dino.py \
       --arch vit_tiny \
-      --epochs 100 \
+      --epochs 1000 \
       --warmup_epochs 10 \
       --output_dir /workspace/outputs/vit_tiny
+
+  vis_vitt:
+    desc: run vis
+    cmds: 
+    - |
+      docker exec -it $CONTAINER_NAME python3 visualize_clusters.py \
+      --arch vit_tiny \
+      --weight_path /workspace/outputs/vit_tiny/checkpoint.pth \
+      --output_dir /workspace/outputs/vit_tiny
+
+  vis_resnet18:
+    desc: run vis
+    cmds: 
+    - |
+      docker exec -it $CONTAINER_NAME python3 visualize_clusters.py \
+      --arch resnet18 \
+      --weight_path /workspace/outputs/resnet18/checkpoint.pth \
+      --output_dir /workspace/outputs/resnet18
